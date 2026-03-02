@@ -1,0 +1,43 @@
+{
+  "name": "masterstack-api",
+  "version": "1.0.0",
+  "description": "17-Skill Master Stack — Cloud Sync Backend",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.6.0",
+    "@trpc/server": "^11.0.0",
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^9.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.10",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^13.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.12.7",
+    "@types/supertest": "^6.0.2",
+    "drizzle-kit": "^0.21.4",
+    "supertest": "^7.0.0",
+    "tsx": "^4.8.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  }
+}

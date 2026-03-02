@@ -1,0 +1,32 @@
+# Render.com Blueprint — 17-Skill Master Stack API
+# This file lets Render auto-deploy the entire backend.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: masterstack-api
+    runtime: node
+    region: oregon
+    plan: free                   # Free tier — 750 hrs/month
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      # ── Add these manually in the Render dashboard ──
+      - key: JWT_SECRET
+        generateValue: true      # Render auto-generates a secure random value
+      - key: JWT_EXPIRES_IN
+        value: 30d
+      - key: TURSO_DATABASE_URL
+        sync: false              # You paste this from Turso
+      - key: TURSO_AUTH_TOKEN
+        sync: false              # You paste this from Turso
+      # ── Set CORS to allow your HTML file's origin ──
+      # e.g. if serving from GitHub Pages: https://yourusername.github.io
+      # e.g. if opening locally: leave as * during testing
+      - key: CORS_ORIGINS
+        value: "*"
