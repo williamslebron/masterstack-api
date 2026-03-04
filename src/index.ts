@@ -4,26 +4,17 @@ import cors from 'cors';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter } from './routers/_app';
 import { createContext } from './middleware/trpc';
+import path from 'path';
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 
-// ── CORS ────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.CORS_ORIGINS ?? '')
-    .split(',')
-    .map(o => o.trim())
-    .filter(Boolean);
-
-// Always allow requests with no origin (mobile apps, curl, etc.)
+// ── CORS — Updated to allow local HTML files and any origin ──────────────────
 app.use(cors({
-    origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-            cb(null, true);
-        } else {
-            cb(new Error(`CORS: origin ${origin} not allowed`));
-        }
-    },
+    origin: true, // Reflects the requester's origin (fixes the "Load failed" error)
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'trpc-batch']
 }));
 
 // ── BODY PARSER ─────────────────────────────────────────────────────────────
@@ -35,7 +26,6 @@ app.get('/health', (_req, res) => {
 });
 
 // ── STATIC — Admin Dashboard ─────────────────────────────────────────────
-import path from 'path';
 app.get('/admin', (_req, res) => {
     res.sendFile(path.join(__dirname, '..', 'masterstack-admin.html'));
 });
