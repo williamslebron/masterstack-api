@@ -8,7 +8,8 @@ COPY . .
 RUN npm run build
 
 # ── Production image ────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+# CHANGE THIS LINE BELOW from alpine to slim
+FROM node:20-slim AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
