@@ -851,6 +851,14 @@
                 </table>
             </div>
 
+            <!-- PENDING EMAIL VERIFICATIONS -->
+            <div class="sec-hd" id="verify-hd" style="display:none">📧 Pending Email Verifications</div>
+            <div id="verify-grid" style="display:none;margin-bottom:24px"></div>
+
+            <!-- PENDING PASSWORD RESETS -->
+            <div class="sec-hd" id="resets-hd" style="display:none">🔑 Pending Password Resets</div>
+            <div id="resets-grid" style="display:none;margin-bottom:24px"></div>
+
         </div>
     </div>
 
@@ -869,7 +877,7 @@
     <script>
         /* ── CONFIG ──────────────────────────────────────────────────────────── */
         // Change to your deployed Render URL when you go live:
-        const API = 'http://localhost:3001/trpc';
+        const API = 'https://masterstack-api.onrender.com/trpc';
 
         const SKILL_NAMES = [
             '', 'Emotional Control', 'Discipline', 'Learning', 'Focus', 'Consistency',
@@ -939,15 +947,55 @@
 
         /* ── LOAD EVERYTHING ─────────────────────────────────────────────────── */
         async function loadAll() {
-            const [users, matrix] = await Promise.all([
+            const [users, matrix, verifications, resets] = await Promise.all([
                 trpc('admin.getAllUsers', undefined, 'query'),
                 trpc('admin.getComparisonMatrix', undefined, 'query'),
+                trpc('admin.getPendingVerifications', undefined, 'query').catch(() => []),
+                trpc('admin.getPendingResets', undefined, 'query').catch(() => []),
             ]);
             USERS_DATA = users;
             MATRIX_DATA = matrix;
             renderStats(users);
             renderUserCards(users);
             renderTable(matrix, activePhase);
+            renderVerifications(verifications || []);
+            renderResets(resets || []);
+        }
+
+        function renderVerifications(records) {
+            const hd = document.getElementById('verify-hd');
+            const grid = document.getElementById('verify-grid');
+            if (!records.length) { hd.style.display = 'none'; grid.style.display = 'none'; return; }
+            hd.style.display = 'block'; grid.style.display = 'grid';
+            grid.style.cssText += ';grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px';
+            grid.innerHTML = records.map(r => `
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">${esc(r.email)}</div>
+                <div style="font-weight:600;margin-bottom:8px">${esc(r.name)}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <code style="background:var(--surface2);padding:6px 12px;border-radius:6px;font-size:16px;font-weight:700;letter-spacing:3px">${esc(r.token)}</code>
+                  <button onclick="navigator.clipboard.writeText('${esc(r.token)}');showToast('Code copied')" style="border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px">Copy</button>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:6px">Share this 6-char code with the user to verify their email.</div>
+              </div>`).join('');
+        }
+
+        function renderResets(records) {
+            const hd = document.getElementById('resets-hd');
+            const grid = document.getElementById('resets-grid');
+            if (!records.length) { hd.style.display = 'none'; grid.style.display = 'none'; return; }
+            hd.style.display = 'block'; grid.style.display = 'grid';
+            grid.style.cssText += ';grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px';
+            grid.innerHTML = records.map(r => `
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">${esc(r.email)}</div>
+                <div style="font-weight:600;margin-bottom:8px">${esc(r.name)}</div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <code style="background:var(--surface2);padding:6px 10px;border-radius:6px;font-size:11px;word-break:break-all;flex:1">${esc(r.token)}</code>
+                  <button onclick="navigator.clipboard.writeText('${esc(r.token)}');showToast('Token copied')" style="border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;flex-shrink:0">Copy</button>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:6px">Expires: ${new Date(r.expiresAt * 1000).toLocaleString()}</div>
+              </div>`).join('');
         }
 
         /* ── STATS ROW ───────────────────────────────────────────────────────── */

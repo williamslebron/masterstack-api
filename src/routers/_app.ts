@@ -5,6 +5,7 @@ import { habitsRouter } from './habits';
 import { tasksRouter } from './tasks';
 import { dashboardRouter } from './dashboard';
 import { adminRouter } from './admin';
+import { customContentRouter } from './customContent';
 
 /** Root tRPC router — merges all sub-routers under their namespaced keys. */
 export const appRouter = router({
@@ -14,6 +15,7 @@ export const appRouter = router({
     tasks: tasksRouter,
     dashboard: dashboardRouter,
     admin: adminRouter,
+    customContent: customContentRouter,
 });
 
 /** TypeScript type of the full API — used by the client for type inference. */

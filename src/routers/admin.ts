@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import { router, protectedProcedure } from '../middleware/trpc';
 import { db } from '../db/client';
-import { users, skillState, habitDays, taskState } from '../db/schema';
+import { users, skillState, habitDays, taskState, passwordResets, emailVerifications } from '../db/schema';
 
 const SKILL_NAMES: Record<number, string> = {
     1: 'Emotional Control', 2: 'Discipline', 3: 'Learning', 4: 'Focus', 5: 'Consistency',
@@ -158,4 +158,41 @@ export const adminRouter = router({
                 .where(eq(users.id, input.userId));
             return { success: true };
         }),
+
+    /**
+     * Returns pending (unused) email verification tokens for all unverified users.
+     * Admin uses this to relay 6-char codes to users manually.
+     */
+    getPendingVerifications: adminProcedure.query(async () => {
+        const records = await db.query.emailVerifications.findMany();
+        const allUsers = await db.query.users.findMany();
+        const userMap = new Map(allUsers.map(u => [u.id, u]));
+        return records.map(r => ({
+            userId: r.userId,
+            email: userMap.get(r.userId)?.email ?? 'unknown',
+            name: userMap.get(r.userId)?.name ?? 'unknown',
+            token: r.token,
+            createdAt: r.createdAt,
+        }));
+    }),
+
+    /**
+     * Returns all unexpired, unused password reset tokens.
+     * Admin uses this to relay tokens to users who forgot their password.
+     */
+    getPendingResets: adminProcedure.query(async () => {
+        const now = new Date();
+        const records = await db.query.passwordResets.findMany();
+        const allUsers = await db.query.users.findMany();
+        const userMap = new Map(allUsers.map(u => [u.id, u]));
+        return records
+            .filter(r => !r.used && r.expiresAt > now)
+            .map(r => ({
+                userId: r.userId,
+                email: userMap.get(r.userId)?.email ?? 'unknown',
+                name: userMap.get(r.userId)?.name ?? 'unknown',
+                token: r.token,
+                expiresAt: r.expiresAt,
+            }));
+    }),
 });
