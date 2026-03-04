@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Stack — Admin Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #07080f;
+            --surface: #0f1019;
+            --surface2: #161720;
+            --surface3: #1e1f2e;
+            --border: rgba(255, 255, 255, .06);
+            --border-hi: rgba(255, 255, 255, .12);
+            --text: #e8e8f0;
+            --muted: #6b6b80;
+            --dim: #2e2e42;
+            --blue: #6366f1;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --sky: #0ea5e9;
+            --radius: 14px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, .12), transparent)
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: var(--surface);
+            border: 1px solid var(--border-hi);
+            border-radius: 20px;
+            padding: 36px 32px;
+        }
+
+        .login-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 8px
+        }
+
+        .login-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px
+        }
+
+        .login-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 28px
+        }
+
+        .field {
+            margin-bottom: 14px
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase
+        }
+
+        .field input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border-hi);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s;
+            font-family: inherit
+        }
+
+        .field input:focus {
+            border-color: var(--blue)
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+            transition: opacity .2s;
+            letter-spacing: .3px
+        }
+
+        .login-btn:hover {
+            opacity: .88
+        }
+
+        .login-err {
+            font-size: 12px;
+            color: var(--red);
+            margin-top: 10px;
+            display: none
+        }
+
+        .login-err.show {
+            display: block
+        }
+
+        /* ── MAIN SHELL ── */
+        #app {
+            display: none;
+            min-height: 100vh
+        }
+
+        /* TOPBAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .topbar-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue)
+        }
+
+        .topbar-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .topbar-sep {
+            flex: 1
+        }
+
+        .admin-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(99, 102, 241, .15);
+            color: var(--blue)
+        }
+
+        .logout-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-hi);
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .logout-btn:hover {
+            color: var(--text);
+            border-color: var(--text)
+        }
+
+        /* PAGE */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 32px
+        }
+
+        @media(max-width:768px) {
+            .page {
+                padding: 20px 16px
+            }
+        }
+
+        /* SECTION HEADER */
+        .sec-hd {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .sec-hd::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        /* STAT CARDS ROW */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 18px;
+        }
+
+        .stat-card .val {
+            font-family: 'Syne', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 4px
+        }
+
+        .stat-card .lbl {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .3px
+        }
+
+        /* USER CARDS */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 14px;
+            margin-bottom: 40px
+        }
+
+        .user-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--blue), var(--green));
+            opacity: .6;
+            transition: opacity .2s
+        }
+
+        .user-card:hover {
+            border-color: var(--border-hi);
+            transform: translateY(-2px)
+        }
+
+        .user-card:hover::before {
+            opacity: 1
+        }
+
+        .uc-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+        .uc-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--blue), var(--sky));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .uc-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .uc-email {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .uc-pct {
+            margin-left: auto;
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text)
+        }
+
+        .uc-bar-wrap {
+            height: 4px;
+            background: var(--surface3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 14px
+        }
+
+        .uc-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--green));
+            border-radius: 2px;
+            transition: width 1s ease
+        }
+
+        .uc-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px
+        }
+
+        .uc-stat {
+            text-align: center
+        }
+
+        .uc-stat .n {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .uc-stat .l {
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-top: 2px
+        }
+
+        /* COMPARISON TABLE */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 40px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px
+        }
+
+        thead th {
+            background: var(--surface2);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0
+        }
+
+        thead th:first-child {
+            min-width: 140px
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s
+        }
+
+        tbody tr:last-child {
+            border-bottom: none
+        }
+
+        tbody tr:hover {
+            background: var(--surface2)
+        }
+
+        tbody td {
+            padding: 10px 12px;
+            font-size: 12px;
+            vertical-align: middle
+        }
+
+        tbody td:first-child {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 13px
+        }
+
+        .pct-cell {
+            position: relative
+        }
+
+        .pct-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(99, 102, 241, .18);
+            transition: width .8s ease;
+            z-index: 0
+        }
+
+        .pct-val {
+            position: relative;
+            z-index: 1;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 12px
+        }
+
+        .pct-0 {
+            color: var(--dim)
+        }
+
+        .pct-low {
+            color: var(--muted)
+        }
+
+        .pct-mid {
+            color: var(--amber)
+        }
+
+        .pct-hi {
+            color: var(--green)
+        }
+
+        /* USER DETAIL PANEL */
+        #detail-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .7);
+            backdrop-filter: blur(4px)
+        }
+
+        #detail-panel.show {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center
+        }
+
+        @media(min-width:600px) {
+            #detail-panel.show {
+                align-items: center
+            }
+        }
+
+        .detail-sheet {
+            background: var(--surface);
+            border: 1px solid var(--border-hi);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 780px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 28px 40px
+        }
+
+        @media(min-width:600px) {
+            .detail-sheet {
+                border-radius: 20px
+            }
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px
+        }
+
+        .detail-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--blue), var(--sky));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff
+        }
+
+        .detail-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 800
+        }
+
+        .detail-email {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .close-btn {
+            margin-left: auto;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border-hi);
+            background: transparent;
+            color: var(--muted);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s
+        }
+
+        .close-btn:hover {
+            color: var(--text);
+            border-color: var(--text)
+        }
+
+        .detail-overall {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--surface2);
+            border-radius: 12px
+        }
+
+        .detail-pct {
+            font-family: 'Syne', sans-serif;
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--blue)
+        }
+
+        .detail-sub {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .skill-rows {}
+
+        .skill-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .skill-row:last-child {
+            border-bottom: none
+        }
+
+        .sk-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--dim);
+            width: 24px
+        }
+
+        .sk-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text)
+        }
+
+        .sk-status {
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase
+        }
+
+        .sk-done {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green)
+        }
+
+        .sk-prog {
+            background: rgba(99, 102, 241, .15);
+            color: var(--blue)
+        }
+
+        .sk-none {
+            background: var(--surface2);
+            color: var(--muted)
+        }
+
+        .sk-right {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .sk-pct {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 36px;
+            text-align: right
+        }
+
+        .sk-streak {
+            font-size: 10px;
+            color: var(--amber);
+            min-width: 40px;
+            text-align: right
+        }
+
+        .sk-bar-wrap {
+            flex: 1;
+            height: 3px;
+            background: var(--surface3);
+            border-radius: 2px;
+            overflow: hidden;
+            min-width: 60px
+        }
+
+        .sk-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), var(--green));
+            border-radius: 2px;
+            transition: width .8s ease
+        }
+
+        /* PHASE TABS */
+        .phase-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            flex-wrap: wrap
+        }
+
+        .phase-tab {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            transition: all .2s
+        }
+
+        .phase-tab.active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff
+        }
+
+        .phase-tab:hover:not(.active) {
+            border-color: var(--border-hi);
+            color: var(--text)
+        }
+
+        /* LOADING / EMPTY */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            border-top-color: var(--blue);
+            animation: spin .8s linear infinite;
+            margin: 0 auto 12px
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-80px);
+            background: var(--surface);
+            border: 1px solid var(--border-hi);
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 13px;
+            color: var(--text);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+            z-index: 200;
+            transition: transform .3s ease;
+            white-space: nowrap
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0)
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ LOGIN SCREEN ══════════════════════════════════════════════════════ -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-eyebrow">Admin Access</div>
+            <div class="login-title">Master Stack</div>
+            <div class="login-sub">Sign in with your admin account to view all users' progress.</div>
+            <div class="field">
+                <label>Email</label>
+                <input id="l-email" type="email" placeholder="your@email.com"
+                    onkeydown="if(event.key==='Enter')doLogin()">
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+            </div>
+            <div class="login-err" id="login-err"></div>
+            <button class="login-btn" onclick="doLogin()">Sign In →</button>
+        </div>
+    </div>
+
+    <!-- ══ MAIN APP ══════════════════════════════════════════════════════════ -->
+    <div id="app">
+        <div class="topbar">
+            <div class="topbar-logo">MasterStack</div>
+            <div class="topbar-title">Admin Dashboard</div>
+            <div class="topbar-sep"></div>
+            <div class="admin-badge">Admin</div>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+
+        <div class="page">
+
+            <!-- GLOBAL STATS -->
+            <div class="sec-hd">Overview</div>
+            <div class="stats-grid" id="stats-grid">
+                <div class="loading">
+                    <div class="spinner"></div>Loading...
+                </div>
+            </div>
+
+            <!-- USER CARDS -->
+            <div class="sec-hd">All Users</div>
+            <div class="users-grid" id="users-grid">
+                <div class="loading">
+                    <div class="spinner"></div>Loading...
+                </div>
+            </div>
+
+            <!-- PHASE FILTER FOR COMPARISON TABLE -->
+            <div class="sec-hd">Skill-by-Skill Comparison</div>
+            <div class="phase-tabs" id="phase-tabs">
+                <button class="phase-tab active" data-phase="0" onclick="setPhase(0)">All 17 Skills</button>
+                <button class="phase-tab" data-phase="1" onclick="setPhase(1)">Phase 1 — Foundation</button>
+                <button class="phase-tab" data-phase="2" onclick="setPhase(2)">Phase 2 — Action</button>
+                <button class="phase-tab" data-phase="3" onclick="setPhase(3)">Phase 3 — Communication</button>
+                <button class="phase-tab" data-phase="4" onclick="setPhase(4)">Phase 4 — Authority</button>
+            </div>
+            <div class="table-wrap">
+                <table id="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th colspan="17">Loading...</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ DETAIL PANEL ══════════════════════════════════════════════════════ -->
+    <div id="detail-panel" onclick="if(event.target===this)closeDetail()">
+        <div class="detail-sheet" id="detail-sheet">
+            <div class="loading">
+                <div class="spinner"></div>Loading user details...
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- ══ SCRIPT ════════════════════════════════════════════════════════════ -->
+    <script>
+        /* ── CONFIG ──────────────────────────────────────────────────────────── */
+        // Change to your deployed Render URL when you go live:
+        const API = 'http://localhost:3001/trpc';
+
+        const SKILL_NAMES = [
+            '', 'Emotional Control', 'Discipline', 'Learning', 'Focus', 'Consistency',
+            'Decision-Making', 'Problem-Solving', 'Execution', 'Adaptability',
+            'Communication', 'Confidence', 'Writing', 'Networking',
+            'Digital Skills', 'Marketing', 'Sales', 'Personal Branding'
+        ];
+        const PHASE_RANGES = { 1: [1, 2, 3, 4, 5], 2: [6, 7, 8, 9], 3: [10, 11, 12, 13], 4: [14, 15, 16, 17] };
+
+        let TOKEN = localStorage.getItem('ms_admin_token') || null;
+        let USERS_DATA = null;
+        let MATRIX_DATA = null;
+        let activePhase = 0;
+
+        /* ── tRPC HELPERS ────────────────────────────────────────────────────── */
+        async function trpc(path, input, method = 'mutation') {
+            const h = { 'Content-Type': 'application/json' };
+            if (TOKEN) h['Authorization'] = 'Bearer ' + TOKEN;
+            try {
+                let res;
+                if (method === 'query') {
+                    const qs = input !== undefined ? '?input=' + encodeURIComponent(JSON.stringify(input)) : '';
+                    res = await fetch(`${API}/${path}${qs}`, { method: 'GET', headers: h });
+                } else {
+                    res = await fetch(`${API}/${path}`, { method: 'POST', headers: h, body: input !== undefined ? JSON.stringify(input) : undefined });
+                }
+                const d = await res.json();
+                if (!res.ok || d.error) throw new Error(d.error?.message || 'HTTP ' + res.status);
+                return d?.result?.data ?? null;
+            } catch (e) { throw e; }
+        }
+
+        /* ── TOAST ───────────────────────────────────────────────────────────── */
+        let _tt;
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 2400);
+        }
+
+        /* ── AUTH ────────────────────────────────────────────────────────────── */
+        async function doLogin() {
+            const email = document.getElementById('l-email').value.trim();
+            const pass = document.getElementById('l-pass').value;
+            const errEl = document.getElementById('login-err');
+            errEl.classList.remove('show');
+            try {
+                const d = await trpc('auth.login', { email, password: pass });
+                if (!d?.token) throw new Error('Login failed');
+                if (!d.user?.isAdmin) throw new Error('This account does not have admin access.');
+                TOKEN = d.token;
+                localStorage.setItem('ms_admin_token', TOKEN);
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadAll();
+            } catch (e) {
+                errEl.textContent = e.message; errEl.classList.add('show');
+            }
+        }
+
+        function logout() {
+            TOKEN = null;
+            localStorage.removeItem('ms_admin_token');
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        /* ── LOAD EVERYTHING ─────────────────────────────────────────────────── */
+        async function loadAll() {
+            const [users, matrix] = await Promise.all([
+                trpc('admin.getAllUsers', undefined, 'query'),
+                trpc('admin.getComparisonMatrix', undefined, 'query'),
+            ]);
+            USERS_DATA = users;
+            MATRIX_DATA = matrix;
+            renderStats(users);
+            renderUserCards(users);
+            renderTable(matrix, activePhase);
+        }
+
+        /* ── STATS ROW ───────────────────────────────────────────────────────── */
+        function renderStats(users) {
+            const totalUsers = users.length;
+            const avgProgress = users.length ? Math.round(users.reduce((s, u) => s + u.overallPct, 0) / users.length) : 0;
+            const totalPomodoro = users.reduce((s, u) => s + u.totalPomodoro, 0);
+            const topStreak = Math.max(...users.map(u => u.longestStreak), 0);
+            const skillsDone = users.reduce((s, u) => s + u.skillsDone, 0);
+            const coursesDone = users.reduce((s, u) => s + u.coursesDone, 0);
+            document.getElementById('stats-grid').innerHTML = [
+                { val: totalUsers, lbl: 'Total Users' },
+                { val: avgProgress + '%', lbl: 'Avg Overall Progress' },
+                { val: skillsDone, lbl: 'Skills Completed' },
+                { val: coursesDone, lbl: 'Courses Completed' },
+                { val: totalPomodoro, lbl: 'Total Pomodoros' },
+                { val: topStreak, lbl: 'Longest Streak (days)' },
+            ].map(s => `
+      <div class="stat-card">
+        <div class="val">${s.val}</div>
+        <div class="lbl">${s.lbl}</div>
+      </div>`).join('');
+        }
+
+        /* ── USER CARDS ──────────────────────────────────────────────────────── */
+        function renderUserCards(users) {
+            document.getElementById('users-grid').innerHTML = users.map(u => `
+      <div class="user-card" onclick="openDetail('${u.id}')">
+        <div class="uc-top">
+          <div class="uc-avatar">${u.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="uc-name">${esc(u.name)}${u.isAdmin ? ' 👑' : ''}</div>
+            <div class="uc-email">${esc(u.email)}</div>
+          </div>
+          <div class="uc-pct">${u.overallPct}%</div>
+        </div>
+        <div class="uc-bar-wrap">
+          <div class="uc-bar" style="width:${u.overallPct}%"></div>
+        </div>
+        <div class="uc-stats">
+          <div class="uc-stat"><div class="n">${u.skillsDone}</div><div class="l">Skills Done</div></div>
+          <div class="uc-stat"><div class="n">${u.coursesDone}</div><div class="l">Courses</div></div>
+          <div class="uc-stat"><div class="n">${u.totalPomodoro}</div><div class="l">Pomodoros</div></div>
+          <div class="uc-stat"><div class="n">${u.longestStreak}d</div><div class="l">Streak</div></div>
+        </div>
+      </div>`).join('');
+        }
+
+        /* ── COMPARISON TABLE ────────────────────────────────────────────────── */
+        function setPhase(p) {
+            activePhase = p;
+            document.querySelectorAll('.phase-tab').forEach(el => {
+                el.classList.toggle('active', parseInt(el.dataset.phase) === p);
+            });
+            if (MATRIX_DATA) renderTable(MATRIX_DATA, p);
+        }
+
+        function renderTable(data, phase) {
+            const { matrix, skillNames } = data;
+            let ids = Array.from({ length: 17 }, (_, i) => i + 1);
+            if (phase > 0) ids = PHASE_RANGES[phase] || ids;
+
+            const thead = document.querySelector('#comparison-table thead tr');
+            const tbody = document.querySelector('#comparison-table tbody');
+
+            thead.innerHTML = '<th>User</th>' + ids.map(id =>
+                `<th title="${skillNames[id]}">${id}. ${skillNames[id].split(' ')[0]}</th>`
+            ).join('');
+
+            tbody.innerHTML = matrix.map(row => {
+                const cells = ids.map(id => {
+                    const v = parseInt(row[`skill_${id}`] || '0');
+                    const cls = v === 0 ? 'pct-0' : v < 40 ? 'pct-low' : v < 80 ? 'pct-mid' : 'pct-hi';
+                    return `<td class="pct-cell">
+          <div class="pct-bar" style="width:${v}%"></div>
+          <div class="pct-val ${cls}">${v > 0 ? v + '%' : '—'}</div>
+        </td>`;
+                }).join('');
+                return `<tr><td>${esc(row.userName)}</td>${cells}</tr>`;
+            }).join('');
+        }
+
+        /* ── USER DETAIL ─────────────────────────────────────────────────────── */
+        async function openDetail(userId) {
+            const panel = document.getElementById('detail-panel');
+            const sheet = document.getElementById('detail-sheet');
+            sheet.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+            panel.classList.add('show');
+
+            try {
+                const d = await trpc('admin.getUserDetail', { userId }, 'query');
+                const ph = [
+                    { label: 'Phase 1 — Foundation', ids: [1, 2, 3, 4, 5], color: '#6366f1' },
+                    { label: 'Phase 2 — Action', ids: [6, 7, 8, 9], color: '#10b981' },
+                    { label: 'Phase 3 — Communication', ids: [10, 11, 12, 13], color: '#f59e0b' },
+                    { label: 'Phase 4 — Authority', ids: [14, 15, 16, 17], color: '#ef4444' },
+                ];
+
+                const skillRows = ph.map(phase => `
+        <div style="margin-bottom:8px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${phase.color};padding-top:14px;border-top:1px solid var(--border)">${phase.label}</div>
+        ${phase.ids.map(id => {
+                    const sk = d.skillBreakdown.find(s => s.skillId === id);
+                    const pct = sk?.progress ?? 0;
+                    const status = sk?.status ?? 'Not Started';
+                    const done = sk?.done;
+                    const streak = sk?.streak ?? 0;
+                    const pom = sk?.pomSessions ?? 0;
+                    const cls = done ? 'sk-done' : status === 'In Progress' ? 'sk-prog' : 'sk-none';
+                    const txt = done ? 'Done' : status;
+                    return `<div class="skill-row">
+            <div class="sk-num">${String(id).padStart(2, '0')}</div>
+            <div>
+              <div class="sk-name">${SKILL_NAMES[id]}</div>
+              <div style="display:flex;gap:6px;align-items:center;margin-top:3px">
+                <div class="sk-bar-wrap" style="min-width:80px"><div class="sk-bar" style="width:${pct}%"></div></div>
+                ${pom > 0 ? `<span style="font-size:9px;color:var(--muted)">🍅 ${pom}</span>` : ''}
+              </div>
+            </div>
+            <div class="sk-right">
+              ${streak > 0 ? `<span class="sk-streak">🔥 ${streak}d</span>` : ''}
+              <span class="sk-pct">${pct}%</span>
+              <span class="sk-status ${cls}">${txt}</span>
+            </div>
+          </div>`;
+                }).join('')}
+      `).join('');
+
+                sheet.innerHTML = `
+        <div class="detail-header">
+          <div class="detail-avatar">${d.user.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="detail-name">${esc(d.user.name)}</div>
+            <div class="detail-email">${esc(d.user.email)}</div>
+          </div>
+          <button class="close-btn" onclick="closeDetail()">×</button>
+        </div>
+        <div class="detail-overall">
+          <div class="detail-pct">${d.overallPct}%</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:2px">Overall Progress</div>
+            <div class="detail-sub">${d.skillBreakdown.filter(s => s.done).length} of 17 skills completed · ${d.skillBreakdown.filter(s => s.courseDone).length} courses done</div>
+          </div>
+        </div>
+        <div class="skill-rows">${skillRows}</div>
+      `;
+            } catch (e) {
+                sheet.innerHTML = `<div class="loading">Failed to load: ${esc(e.message)}</div>`;
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-panel').classList.remove('show');
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+        /* ── UTILS ───────────────────────────────────────────────────────────── */
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        /* ── AUTO LOGIN CHECK ─────────────────────────────────────────────────── */
+        (async () => {
+            if (!TOKEN) return;
+            try {
+                const me = await trpc('auth.me', undefined, 'query');
+                if (!me?.isAdmin) { TOKEN = null; localStorage.removeItem('ms_admin_token'); return; }
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadAll();
+            } catch {
+                TOKEN = null; localStorage.removeItem('ms_admin_token');
+            }
+        })();
+    </script>
+</body>
+
+</html>

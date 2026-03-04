@@ -34,6 +34,12 @@ app.get('/health', (_req, res) => {
     res.json({ status: 'ok', ts: new Date().toISOString() });
 });
 
+// ── STATIC — Admin Dashboard ─────────────────────────────────────────────
+import path from 'path';
+app.get('/admin', (_req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'masterstack-admin.html'));
+});
+
 // ── tRPC ──────────────────────────────────────────────────────────────────────
 app.use(
     '/trpc',

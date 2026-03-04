@@ -8,6 +8,13 @@
       "when": 1772452976735,
       "tag": "0000_quick_mariko_yashida",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1772453807335,
+      "tag": "0001_giant_thor_girl",
+      "breakpoints": true
     }
   ]
 }
